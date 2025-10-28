@@ -1,0 +1,15 @@
+{
+	"id": "fb59f6b1-2e91-4eee-86ec-660295b598b2",
+	"name": "Prod",
+	"values": [
+		{
+			"key": "url",
+			"value": "https://reqres.in",
+			"type": "default",
+			"enabled": true
+		}
+	],
+	"_postman_variable_scope": "environment",
+	"_postman_exported_at": "2025-10-28T11:11:50.860Z",
+	"_postman_exported_using": "Postman/11.68.5"
+}
