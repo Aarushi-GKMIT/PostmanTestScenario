@@ -1,7 +1,16 @@
+
+
+
+
+
+
+
+
 pipeline {
     agent any
 
     environment {
+        PATH = "/usr/local/bin:/opt/homebrew/bin:$PATH"
         COLLECTION = 'MyCollection.json'
         ENV_FILE   = 'environment.json'
     }
@@ -62,10 +71,3 @@ pipeline {
         }
     }
 }
-
-
-
-
-
-
-
