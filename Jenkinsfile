@@ -2,53 +2,52 @@ pipeline {
     agent any
 
     environment {
-        // Add Node and Newman paths if needed
-        PATH = "/usr/local/bin:/opt/homebrew/bin:$PATH"
+        COLLECTION = 'MyCollection.json'
+        ENV_FILE   = 'environment.json'
     }
 
     stages {
-        stage('Checkout') {
+        stage('Checkout Code') {
             steps {
-                echo '📦 Cloning repository...'
+                echo 'Pulling latest code from GitHub...'
                 checkout scm
             }
         }
 
-        stage('Install Newman') {
+        stage('Install Dependencies') {
             steps {
-                echo '📦 Installing Newman...'
+                echo 'Installing Newman (if not already installed)...'
                 sh '''
                     if ! command -v newman &> /dev/null
                     then
-                        npm install -g newman
+                      echo "Newman not found, installing globally..."
+                      npm install -g newman
                     else
-                        echo "✅ Newman already installed"
+                      echo "Newman is already installed."
                     fi
                 '''
             }
         }
 
-        stage('Run API Tests (CI)') {
+        stage('Continuous Integration - Run Postman Tests') {
             steps {
-                echo '🚀 Running Postman tests...'
+                echo 'Running Postman collection tests...'
                 sh '''
-                    newman run MyCollection.json \
-                        --environment environment.json \
-                        --reporters cli,junit \
-                        --reporter-junit-export results.xml
+                    echo ">>> Starting Newman Test Run"
+                    newman run $COLLECTION --environment $ENV_FILE || exit 1
                 '''
             }
         }
 
-        stage('Deploy (CD)') {
+        stage('Continuous Deployment - Dummy Deploy') {
             when {
-                expression { currentBuild.resultIsBetterOrEqualTo('SUCCESS') }
+                expression { currentBuild.currentResult == 'SUCCESS' }
             }
             steps {
-                echo '🚢 All tests passed! Starting deployment...'
+                echo 'All tests passed. Deploying application...'
                 sh '''
-                    echo "✅ Deployment simulated — put your deploy commands here."
-                    # Example: scp files to server, or docker build/push commands
+                    echo ">>> Deploy simulation complete!"
+                    echo "This confirms CI/CD pipeline automation is working!"
                 '''
             }
         }
@@ -56,13 +55,14 @@ pipeline {
 
     post {
         success {
-            echo '🎉 Pipeline completed successfully!'
+            echo '🎉 Build and deployment successful!'
         }
         failure {
-            echo '❌ Pipeline failed! Check logs for details.'
+            echo '❌ Build failed. Check logs above.'
         }
     }
 }
+
 
 
 
