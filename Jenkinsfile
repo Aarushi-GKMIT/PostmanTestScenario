@@ -1,58 +1,53 @@
-// 🔁 Test Automation Commit #3 — New CI/CD flow
-
 pipeline {
     agent any
 
     environment {
         COLLECTION = 'MyCollection.json'
         ENV_FILE   = 'environment.json'
-        REPORT     = 'newman-report.html'
     }
 
     stages {
-
-        stage('Checkout from GitHub') {
+        stage('Checkout Code') {
             steps {
-                echo "📦 Fetching latest code from GitHub..."
+                echo 'Pulling latest code from GitHub...'
                 checkout scm
             }
         }
 
-        stage('Setup Environment') {
+        stage('Install Dependencies') {
             steps {
-                echo "⚙️ Checking Newman installation..."
+                echo 'Installing Newman (if not already installed)...'
                 sh '''
                     if ! command -v newman &> /dev/null
                     then
-                        echo "Installing Newman globally..."
-                        npm install -g newman newman-reporter-html
+                      echo "Newman not found, installing globally..."
+                      npm install -g newman
                     else
-                        echo "✅ Newman already installed"
+                      echo "Newman is already installed."
                     fi
                 '''
             }
         }
 
-        stage('Postman Regression Tests') {
+        stage('Continuous Integration - Run Postman Tests') {
             steps {
-                echo "🧪 Running Postman tests at $(date)"
+                echo 'Running Postman collection tests...'
                 sh '''
-                    echo "Starting Newman collection run..."
-                    newman run $COLLECTION --environment $ENV_FILE \
-                        --reporters cli,html --reporter-html-export $REPORT
+                    echo ">>> Starting Newman Test Run"
+                    newman run $COLLECTION --environment $ENV_FILE || exit 1
                 '''
             }
         }
 
-        stage('Continuous Deployment (Simulated)') {
+        stage('Continuous Deployment - Dummy Deploy') {
             when {
                 expression { currentBuild.currentResult == 'SUCCESS' }
             }
             steps {
-                echo "🚀 Deploying build to staging (simulation)..."
+                echo 'All tests passed. Deploying application...'
                 sh '''
-                    echo "Deployment timestamp: $(date)"
-                    echo ">>> Deployment complete!"
+                    echo ">>> Deploy simulation complete!"
+                    echo "This confirms CI/CD pipeline automation is working!"
                 '''
             }
         }
@@ -60,14 +55,14 @@ pipeline {
 
     post {
         success {
-            echo "🎉 CI/CD pipeline executed successfully!"
-            echo "HTML report generated: $REPORT"
+            echo '🎉 Build and deployment successful!'
         }
         failure {
-            echo "❌ Build failed. Please check console output or Newman logs."
+            echo '❌ Build failed. Check logs above.'
         }
     }
 }
+
 
 
 
