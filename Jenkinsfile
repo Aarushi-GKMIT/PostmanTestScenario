@@ -56,7 +56,7 @@ pipeline {
 
     post {
         success {
-            echo '🎉 Build and deployment successful and see aarushi!'
+            echo '🎉 Build and deployment successful and see aarushi agarwal!'
         }
         failure {
             echo '❌ Build failed. Check logs above and see'
