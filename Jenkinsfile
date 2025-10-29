@@ -2,44 +2,68 @@ pipeline {
     agent any
 
     environment {
-        PATH = "$PATH:/usr/local/bin:/opt/homebrew/bin"
+        // Add Node and Newman paths if needed
+        PATH = "/usr/local/bin:/opt/homebrew/bin:$PATH"
     }
 
     stages {
         stage('Checkout') {
             steps {
-                git branch: 'main', url: 'https://github.com/Aarushi-GKMIT/PostmanTestScenario.git'
+                echo '📦 Cloning repository...'
+                checkout scm
             }
         }
 
-        stage('Run API Tests') {
+        stage('Install Newman') {
             steps {
+                echo '📦 Installing Newman...'
                 sh '''
-                    echo "🚀 Running Postman collection..."
-                    newman run MyCollection.json --environment environment.json \
-                    --reporters cli,html \
-                    --reporter-html-export newman-report.html
+                    if ! command -v newman &> /dev/null
+                    then
+                        npm install -g newman
+                    else
+                        echo "✅ Newman already installed"
+                    fi
                 '''
             }
         }
 
-        stage('Archive Results') {
+        stage('Run API Tests (CI)') {
             steps {
-                archiveArtifacts artifacts: 'newman-report.html', fingerprint: true
+                echo '🚀 Running Postman tests...'
+                sh '''
+                    newman run MyCollection.json \
+                        --environment environment.json \
+                        --reporters cli,junit \
+                        --reporter-junit-export results.xml
+                '''
+            }
+        }
+
+        stage('Deploy (CD)') {
+            when {
+                expression { currentBuild.resultIsBetterOrEqualTo('SUCCESS') }
+            }
+            steps {
+                echo '🚢 All tests passed! Starting deployment...'
+                sh '''
+                    echo "✅ Deployment simulated — put your deploy commands here."
+                    # Example: scp files to server, or docker build/push commands
+                '''
             }
         }
     }
 
     post {
-        always {
-            echo 'Pipeline finished (success or fail).'
-        }
         success {
-            echo '✅ All tests passed successfully!'
+            echo '🎉 Pipeline completed successfully!'
         }
         failure {
-            echo '❌ Tests failed. Please check newman-report.html for details.'
+            echo '❌ Pipeline failed! Check logs for details.'
         }
     }
 }
+
+
+
 
