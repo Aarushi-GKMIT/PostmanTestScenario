@@ -67,7 +67,7 @@ pipeline {
             echo '🎉 Build and deployment successful!'
         }
         failure {
-            echo '❌ Build failed. Check logs above.'
+            echo '❌ Build failed. Check logs above and see aarushi name'
         }
     }
 }
